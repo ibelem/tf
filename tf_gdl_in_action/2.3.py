@@ -1,4 +1,6 @@
-# # Just disables the warning, doesn't enable AVX/FMA
+# Also refer to https://github.com/caicloud/tensorflow-tutorial/tree/master/Deep_Learning_with_TensorFlow/1.4.0
+
+# Just disables the warning, doesn't enable AVX/FMA
 # import os
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
