@@ -11,6 +11,6 @@ b = tf.constant([3.0, 4.0], name='b')
 
 result = a + b
 print(result)
-sess = tf.Session()
-print(sess.run(result))
-sess.close()
+
+with tf.Session() as sess:
+    print(sess.run(result))
