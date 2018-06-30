@@ -1,9 +1,9 @@
 # 完整神经网络样例程序
 
 ## 神经网络训练步骤
-## 1. 定义神经网络结构和前向传播的输出结构
-## 2. 定义损失函数以及选择反向传播优化算法
-## 3. 生成会话并在训练数据上反复反向传播优化算法
+## 1. 定义神经网络的结构和前向传播的输出结果 得到预测值, 并对比预测值和真实值的差距
+## 2. 定义损失函数以及选择反向传播优化的算法
+## 3. 生成会话并在训练数据上反复运行反向传播优化算法
 
 import tensorflow as tf
 # Numpy 生成模拟数据集
@@ -28,8 +28,15 @@ a = tf.matmul(x, w1)
 y = tf.matmul(a, w2)
 
 # 损失函数和反向传播过程
-# 交叉熵
+# 交叉熵 H(p, q) = -∑p(x)logq(x)
+
+# y_ 正确结果
+# y 预测结果
+# tf.clip_by_value 限定张量数值在一个范围内 1.0x10^-10 ~ 1.0
+# * 矩阵元素直接相乘，不同于矩阵乘法 tf.matmul()
+# 平均交叉熵
 cross_entropy = -tf.reduce_mean(y_*tf.log(tf.clip_by_value(y, 1e-10, 1.0)))
+# cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(y, y_)
 train_step = tf.train.AdamOptimizer(0.001).minimize(cross_entropy)
 
 # 随机数生成模拟数据集
