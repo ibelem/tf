@@ -32,44 +32,68 @@ REGULARIZATION_RATE = 0.0001    #描述模型复杂度的正则化项在损失�
 TRAINING_STEPS = 30000   #训练轮数
 MOVING_AVERAGE_DECAY = 0.99 #滑动平均衰减率
 
-'''定义一个辅助函数，用于计算神经网络的前向结果
-ReLU 激活函数的三层全连接神经网络, 加入隐藏层实现多层网络结构
-通过 ReLU 实现非线性
-其中参数avg_classs是用于计算参数平均值的类
-这样方便在测试时使用滑动平均模型'''
-def inference(input_tensor, avg_class, w1, b1, w2, b2):
-    '''
-    :param input_tensor: 输入
-    :param avg_class: 用于计算参数平均值的类
-    :param w1: 第一层权重
-    :param b1: 第一层偏置
-    :param w2: 第二层权重
-    :param b2: 第二层偏置
-    :return: 返回神经网络的前向结果
-    '''
-    if avg_class == None:
-        layer1 = tf.nn.relu(tf.matmul(input_tensor, w1) + b1)
-        # 计算损失函数时会一并计算 softmax 函数, 因为此处无需加入激活函数
-        # 不加入 softmax 不影响预测结果, 因为预测时使用的是不同类别对应节点输出值相对大小
-        # 没有 softmax 层对最后分类结果计算没有影响
-        # 于是最后计算整个神经网络前向传播时可不加入最后的 softmax 层
-        return tf.matmul(layer1, w2) + b2
-    else:
-        # 使用滑动平均类计算参数的滑动平均值
-        layer1 = tf.nn.relu(tf.matmul(input_tensor, avg_class.average(w1)) + avg_class.average(b1))
-        return tf.matmul(layer1, avg_class.average(w2)) + avg_class.average(b2)
+def inference(input_tensor, avg_class, reuse=False):
+    with tf.variable_scope('layer1', reuse=tf.AUTO_REUSE):
+        weights = tf.get_variable('weights', [INPUT_NODE, LAYER1_NODE],
+                                  initializer=tf.truncated_normal_initializer(stddev=0.1))
+        biases = tf.get_variable('biases', [INPUT_NODE, LAYER1_NODE],
+                                 initializer=tf.constant_initializer(0.0))
+        if avg_class:
+            layer1 = tf.nn.relu(tf.matmul(input_tensor, avg_class.average(weights)) + avg_class.average(biases))
+        else:
+            layer1 = tf.nn.relu(tf.matmul(input_tensor, weights) + biases)
+
+    with tf.variable_scope('layer2', reuse=tf.AUTO_REUSE):
+        weights = tf.get_variable('weights', [LAYER1_NODE, OUTPUT_NONE],
+                                  initializer=tf.truncated_normal_initializer(stddev=0.1))
+        biases = tf.get_variable('biases', [OUTPUT_NONE],
+                                 initializer=tf.constant_initializer(0.0))
+        if avg_class:
+            layer2 = tf.nn.relu(tf.matmul(layer1, avg_class.average(weights)) + avg_class.average(biases))
+        else:
+            layer2 = tf.nn.relu(tf.matmul(layer1, weights) + biases)
+
+    return layer2
+
+# '''定义一个辅助函数，用于计算神经网络的前向结果
+# ReLU 激活函数的三层全连接神经网络, 加入隐藏层实现多层网络结构
+# 通过 ReLU 实现非线性
+# 其中参数avg_classs是用于计算参数平均值的类
+# 这样方便在测试时使用滑动平均模型'''
+# def inference(input_tensor, avg_class, w1, b1, w2, b2):
+#     '''
+#     :param input_tensor: 输入
+#     :param avg_class: 用于计算参数平均值的类
+#     :param w1: 第一层权重
+#     :param b1: 第一层偏置
+#     :param w2: 第二层权重
+#     :param b2: 第二层偏置
+#     :return: 返回神经网络的前向结果
+#     '''
+#     if avg_class == None:
+#         layer1 = tf.nn.relu(tf.matmul(input_tensor, w1) + b1)
+#         # 计算损失函数时会一并计算 softmax 函数, 因为此处无需加入激活函数
+#         # 不加入 softmax 不影响预测结果, 因为预测时使用的是不同类别对应节点输出值相对大小
+#         # 没有 softmax 层对最后分类结果计算没有影响
+#         # 于是最后计算整个神经网络前向传播时可不加入最后的 softmax 层
+#         return tf.matmul(layer1, w2) + b2
+#     else:
+#         # 使用滑动平均类计算参数的滑动平均值
+#         layer1 = tf.nn.relu(tf.matmul(input_tensor, avg_class.average(w1)) + avg_class.average(b1))
+#         return tf.matmul(layer1, avg_class.average(w2)) + avg_class.average(b2)
 
 def train(mnist):
     x = tf.placeholder(tf.float32, [None, INPUT_NODE], name='x-input')  #维度可以自动算出，也就是样本数
     y_ = tf.placeholder(tf.float32, [None, OUTPUT_NONE], name='y-input')
     # 生成隐藏层的参数
-    w1 = tf.Variable(tf.truncated_normal([INPUT_NODE, LAYER1_NODE], stddev=0.1))    #一种正态的随机数
-    b1 = tf.Variable(tf.constant(0.1, shape=[LAYER1_NODE]))
+    # w1 = tf.Variable(tf.truncated_normal([INPUT_NODE, LAYER1_NODE], stddev=0.1))    #一种正态的随机数
+    # b1 = tf.Variable(tf.constant(0.1, shape=[LAYER1_NODE]))
     # 生成输出层的参数
-    w2 = tf.Variable(tf.truncated_normal([LAYER1_NODE, OUTPUT_NONE], stddev=0.1))
-    b2 = tf.Variable(tf.constant(0.1, shape=[OUTPUT_NONE]))
+    # w2 = tf.Variable(tf.truncated_normal([LAYER1_NODE, OUTPUT_NONE], stddev=0.1))
+    # b2 = tf.Variable(tf.constant(0.1, shape=[OUTPUT_NONE]))
     # 计算不含滑动平均类的前向传播结果
-    y = inference(x, None, w1, b1, w2, b2)
+    y = inference(x, None)
+    # y = inference(x, None, w1, b1, w2, b2)
     # 定义训练轮数
     global_step = tf.Variable(0, trainable=False)   #一般训练轮数的变量指定为不可训练的参数
     # 给定滑动平均衰减率和训练轮数的变量，初始化滑动平均类
@@ -79,7 +103,8 @@ def train(mnist):
     variable_averages_op = variable_averages.apply(tf.trainable_variables())
     # 计算使用滑动平均的前向结果
     # 滑动平均不会改变变量本身取值，而是维护一个影子变量来记录其滑动平均，需要明确调用 average 函数
-    average_y = inference(x, variable_averages, w1, b1, w2, b2)
+    average_y = inference(x, variable_averages)
+    # average_y = inference(x, variable_averages, w1, b1, w2, b2)
     # 计算交叉熵及其平均值
     # 交叉熵为刻画预测之及真实值之间差距的损失函数
     # sparse_softmax_cross_entropy_with_logits 分类问题只有一个正确答案(本例0~9)时使用此函数加速交叉熵计算
@@ -90,6 +115,9 @@ def train(mnist):
     cross_entropy_mean = tf.reduce_mean(cross_entropy)
     # 损失函数的计算 + L2 正则化
     regularizer = tf.contrib.layers.l2_regularizer(REGULARIZATION_RATE) #正则化损失函数
+
+    w1 = tf.get_variable('layer1/weights', [INPUT_NODE, LAYER1_NODE])
+    w2 = tf.get_variable('layer2/weights', [LAYER1_NODE, OUTPUT_NONE])
     regularization = regularizer(w1) + regularizer(w2)  #模型的正则化损失
     loss = cross_entropy_mean + regularization  #总损失函数=交叉熵损失和正则化损失的和
     # 设置指数衰减的学习率
