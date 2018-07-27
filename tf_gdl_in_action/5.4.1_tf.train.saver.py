@@ -35,7 +35,7 @@ with tf.Session() as sess:
 #     saver.restore(sess, '/home/belem/github/tf/model5.4.1.ckpt')
 #     print(sess.run(v))
 
-import tensorflow as tf5.4.1_tf.train.saver.py
+import tensorflow as tf
 
 saver = tf.train.import_meta_graph('/home/belem/github/tf/model5.4.1.ckpt.meta')
 

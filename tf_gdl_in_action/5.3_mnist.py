@@ -36,7 +36,7 @@ def inference(input_tensor, avg_class, reuse=False):
     with tf.variable_scope('layer1', reuse=tf.AUTO_REUSE):
         weights = tf.get_variable('weights', [INPUT_NODE, LAYER1_NODE],
                                   initializer=tf.truncated_normal_initializer(stddev=0.1))
-        biases = tf.get_variable('biases', [INPUT_NODE, LAYER1_NODE],
+        biases = tf.get_variable('biases', [LAYER1_NODE],
                                  initializer=tf.constant_initializer(0.0))
         if avg_class:
             layer1 = tf.nn.relu(tf.matmul(input_tensor, avg_class.average(weights)) + avg_class.average(biases))
@@ -51,7 +51,7 @@ def inference(input_tensor, avg_class, reuse=False):
         if avg_class:
             layer2 = tf.nn.relu(tf.matmul(layer1, avg_class.average(weights)) + avg_class.average(biases))
         else:
-            layer2 = tf.nn.relu(tf.matmul(layer1, weights) + biases)
+            layer2 = tf.matmul(layer1, weights) + biases
 
     return layer2
 

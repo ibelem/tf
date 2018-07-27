@@ -16,7 +16,7 @@
 #     sess.run(init_op)
 #     print(sess.run(result))
 #     print(sess.run(a))
-#     saver.save(sess, '/home/belem/github/tf/model1.ckpt')
+#     saver.save(sess, '/home/belem/github/tf/model54.ckpt')
 #     # model1.ckpt.meta 计算图结构
 #     # model1.ckpt TF 每个变量取值
 #     # checkpoint 目录下模型文件列表
@@ -39,16 +39,16 @@
 #
 # with tf.Session() as sess:
 #     # sess.run(init_op)
-#     saver.restore(sess, '/home/belem/github/tf/model1.ckpt')
+#     saver.restore(sess, '/home/belem/github/tf/model54.ckpt')
 #     print(sess.run(result))
 #     print(sess.run(a))
 
 
 import tensorflow as tf
 
-saver = tf.train.import_meta_graph('/home/belem/github/tf/model1.ckpt.meta')
+saver = tf.train.import_meta_graph('/home/belem/github/tf/model54.ckpt.meta')
 
 with tf.Session() as sess:
-    saver.restore(sess, '/home/belem/github/tf/model1.ckpt')
+    saver.restore(sess, '/home/belem/github/tf/model54.ckpt')
     print(sess.run(tf.get_default_graph().get_tensor_by_name("add:0")))
     print(sess.run(tf.get_default_graph().get_tensor_by_name("example-matmul:0")))
