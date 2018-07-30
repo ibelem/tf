@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 INPUT_NODE = 784  #28x28 输入层节点数 == 图片像素数
-OUTPUT_NONE = 10  #输出层节点数, 0~9
+OUTPUT_NODE = 10  #输出层节点数, 0~9
 LAYER1_NODE = 500   #隐藏层节点数
 
 def get_wight_variable(shape, regularizer):
@@ -23,8 +23,8 @@ def inference(input_tensor, regularizer):
 
     # 输出层
     with tf.variable_scope('layer2'):
-        weights = get_wight_variable([LAYER1_NODE, OUTPUT_NONE], regularizer)
-        biases = tf.get_variable('biases', [OUTPUT_NONE],
+        weights = get_wight_variable([LAYER1_NODE, OUTPUT_NODE], regularizer)
+        biases = tf.get_variable('biases', [OUTPUT_NODE],
                                  initializer=tf.constant_initializer(0.0))
         layer2 = tf.matmul(layer1, weights) + biases
 

@@ -16,7 +16,7 @@ MODEL_NAME = 'mnist55.ckpt'
 
 def train(mnist):
     x = tf.placeholder(tf.float32, [None, mnist_inference.INPUT_NODE], name='x-input')  #维度可以自动算出，也就是样本数
-    y_ = tf.placeholder(tf.float32, [None, mnist_inference.OUTPUT_NONE], name='y-input')
+    y_ = tf.placeholder(tf.float32, [None, mnist_inference.OUTPUT_NODE], name='y-input')
 
     # 损失函数的计算 + L2 正则化
     regularizer = tf.contrib.layers.l2_regularizer(REGULARIZATION_RATE) #正则化损失函数
